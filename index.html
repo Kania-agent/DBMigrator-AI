@@ -1,123 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBMigrator-AI — Database Migration Manager</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DBMigrator-AI — Database Migration Tool</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="top-bar">
-        <div class="logo">
-            <span class="logo-icon">⬡</span>
-            <h1>DBMigrator<span class="ai-badge">AI</span></h1>
+<div class="app-container">
+  <header class="app-header">
+    <h1>🗄️ DBMigrator-AI</h1>
+    <p class="subtitle">Database Schema Migration & Diff Tool</p>
+  </header>
+
+  <div class="toolbar">
+    <button id="btnNewMigration" class="btn btn-primary" onclick="newMigration()">+ New Migration</button>
+    <button id="btnHistory" class="btn" onclick="showHistory()">📋 History</button>
+    <button id="btnExport" class="btn" onclick="exportMigration()" disabled>💾 Export SQL</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('schemas')">Schema Editor</button>
+    <button class="tab" onclick="switchTab('diff')">Diff & Generate</button>
+    <button class="tab" onclick="switchTab('preview')">SQL Preview</button>
+    <button class="tab" onclick="switchTab('rollback')">Rollback</button>
+  </div>
+
+  <!-- Schema Editor Tab -->
+  <div id="tab-schemas" class="tab-content active">
+    <div class="schema-panels">
+      <div class="schema-panel">
+        <h3>📦 Source Schema</h3>
+        <div class="table-list" id="sourceTables"></div>
+        <div class="add-table-form">
+          <input type="text" id="srcNewTable" placeholder="Table name">
+          <button class="btn btn-small" onclick="addSourceTable()">Add Table</button>
         </div>
-        <nav class="nav-tabs">
-            <button class="nav-tab active" data-tab="schema-diff">Schema Diff</button>
-            <button class="nav-tab" data-tab="migrations">Migrations</button>
-            <button class="nav-tab" data-tab="exec-log">Execution Log</button>
-        </nav>
-        <div class="status-badge">
-            <span class="pulse-dot"></span> Connected to <strong>prod_db</strong>
+      </div>
+      <div class="schema-panel">
+        <h3>🎯 Target Schema</h3>
+        <div class="table-list" id="targetTables"></div>
+        <div class="add-table-form">
+          <input type="text" id="tgtNewTable" placeholder="Table name">
+          <button class="btn btn-small" onclick="addTargetTable()">Add Table</button>
         </div>
-    </header>
+      </div>
+    </div>
 
-    <main class="main-content">
-        <!-- Schema Diff Tab -->
-        <section id="schema-diff" class="tab-panel active">
-            <div class="panel-header">
-                <h2>Schema Diff Viewer</h2>
-                <div class="diff-controls">
-                    <select id="source-db" class="db-select">
-                        <option value="source">Source: dev_database</option>
-                    </select>
-                    <span class="arrow-icon">→</span>
-                    <select id="target-db" class="db-select">
-                        <option value="target">Target: prod_database</option>
-                    </select>
-                    <button class="btn btn-primary" id="compare-btn">Compare Schemas</button>
-                </div>
-            </div>
-            <div class="diff-container">
-                <div class="diff-panel diff-source">
-                    <div class="diff-panel-header">
-                        <span class="db-label">Source Schema</span>
-                        <span class="table-count">4 tables</span>
-                    </div>
-                    <div class="schema-tree" id="source-tree"></div>
-                </div>
-                <div class="diff-divider">
-                    <div class="diff-summary" id="diff-summary">
-                        <div class="diff-stat added">+2 Tables</div>
-                        <div class="diff-stat modified">~3 Columns</div>
-                        <div class="diff-stat removed">-0 Tables</div>
-                    </div>
-                </div>
-                <div class="diff-panel diff-target">
-                    <div class="diff-panel-header">
-                        <span class="db-label">Target Schema</span>
-                        <span class="table-count">6 tables</span>
-                    </div>
-                    <div class="schema-tree" id="target-tree"></div>
-                </div>
-            </div>
-            <div class="ai-analysis-box">
-                <div class="ai-icon">⬡</div>
-                <div class="ai-content">
-                    <h4>AI Schema Analysis</h4>
-                    <p>Found <strong>2 new tables</strong>, <strong>3 column modifications</strong>, and <strong>1 missing index</strong>. Migration estimated at <strong>4.2 seconds</strong> with low risk. Recommended to add foreign key constraints for <code>orders.user_id</code> before applying.</p>
-                </div>
-            </div>
-        </section>
+    <div class="templates-section">
+      <h3>Quick Templates</h3>
+      <button class="btn btn-small" onclick="loadTemplate('ecommerce')">E-Commerce</button>
+      <button class="btn btn-small" onclick="loadTemplate('blog')">Blog/CMS</button>
+      <button class="btn btn-small" onclick="loadTemplate('saas')">SaaS App</button>
+      <button class="btn btn-small" onclick="loadTemplate('social')">Social Media</button>
+    </div>
+  </div>
 
-        <!-- Migrations Tab -->
-        <section id="migrations" class="tab-panel">
-            <div class="panel-header">
-                <h2>Migration Status</h2>
-                <button class="btn btn-success" id="run-migration-btn">▶ Run Pending Migrations</button>
-            </div>
-            <div class="migration-stats">
-                <div class="stat-card stat-completed">
-                    <div class="stat-number">24</div>
-                    <div class="stat-label">Completed</div>
-                </div>
-                <div class="stat-card stat-pending">
-                    <div class="stat-number">3</div>
-                    <div class="stat-label">Pending</div>
-                </div>
-                <div class="stat-card stat-running">
-                    <div class="stat-number">1</div>
-                    <div class="stat-label">Running</div>
-                </div>
-                <div class="stat-card stat-failed">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Failed</div>
-                </div>
-            </div>
-            <div class="migration-list" id="migration-list"></div>
-        </section>
+  <!-- Diff & Generate Tab -->
+  <div id="tab-diff" class="tab-content">
+    <div class="diff-controls">
+      <button class="btn btn-primary" onclick="detectDifferences()">🔍 Detect Differences</button>
+      <button class="btn" onclick="generateMigrationSQL()">⚡ Generate Migration SQL</button>
+    </div>
+    <div id="diffResults" class="diff-results">
+      <p class="placeholder">Click "Detect Differences" to compare schemas.</p>
+    </div>
+  </div>
 
-        <!-- Execution Log Tab -->
-        <section id="exec-log" class="tab-panel">
-            <div class="panel-header">
-                <h2>Execution Log</h2>
-                <div class="log-controls">
-                    <button class="btn btn-sm" id="clear-log-btn">Clear</button>
-                    <button class="btn btn-sm" id="export-log-btn">Export</button>
-                    <label class="auto-scroll-label">
-                        <input type="checkbox" id="auto-scroll" checked> Auto-scroll
-                    </label>
-                </div>
-            </div>
-            <div class="log-output" id="log-output"></div>
-        </section>
-    </main>
+  <!-- SQL Preview Tab -->
+  <div id="tab-preview" class="tab-content">
+    <div class="sql-preview-controls">
+      <h3>Generated SQL Migration</h3>
+      <div class="preview-actions">
+        <button class="btn btn-small" onclick="copySQL('migration')">📋 Copy</button>
+        <button class="btn btn-small btn-success" onclick="simulateExecute()">▶️ Simulate Execute</button>
+      </div>
+    </div>
+    <pre id="sqlPreview" class="sql-block">-- No migration generated yet.</pre>
+    <div id="executionLog" class="execution-log" style="display:none">
+      <h4>Execution Log</h4>
+      <div id="executionLogContent"></div>
+    </div>
+  </div>
 
-    <footer class="bottom-bar">
-        <span>DBMigrator-AI v2.1.0</span>
-        <span>Powered by MiMo V2.5</span>
-    </footer>
+  <!-- Rollback Tab -->
+  <div id="tab-rollback" class="tab-content">
+    <div class="rollback-controls">
+      <h3>Rollback Script</h3>
+      <button class="btn btn-small" onclick="generateRollback()">🔄 Generate Rollback</button>
+      <button class="btn btn-small" onclick="copySQL('rollback')">📋 Copy</button>
+    </div>
+    <pre id="rollbackPreview" class="sql-block">-- No rollback generated yet.</pre>
+  </div>
 
-    <script src="app.js"></script>
+  <!-- Migration History Modal -->
+  <div id="historyModal" class="modal" style="display:none">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Migration History</h3>
+        <button class="btn-close" onclick="closeHistory()">&times;</button>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </div>
+  </div>
+
+  <!-- Column Edit Modal -->
+  <div id="columnModal" class="modal" style="display:none">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h3 id="columnModalTitle">Add Column</h3>
+        <button class="btn-close" onclick="closeColumnModal()">&times;</button>
+      </div>
+      <div class="column-form">
+        <label>Column Name</label>
+        <input type="text" id="colName" placeholder="e.g. user_id">
+        <label>Type</label>
+        <select id="colType">
+          <option value="INT">INT</option>
+          <option value="BIGINT">BIGINT</option>
+          <option value="VARCHAR(255)">VARCHAR(255)</option>
+          <option value="TEXT">TEXT</option>
+          <option value="BOOLEAN">BOOLEAN</option>
+          <option value="DATE">DATE</option>
+          <option value="TIMESTAMP">TIMESTAMP</option>
+          <option value="DECIMAL(10,2)">DECIMAL(10,2)</option>
+          <option value="FLOAT">FLOAT</option>
+          <option value="UUID">UUID</option>
+        </select>
+        <label>Constraints</label>
+        <div class="checkbox-row">
+          <label><input type="checkbox" id="colPK"> PRIMARY KEY</label>
+          <label><input type="checkbox" id="colNN"> NOT NULL</label>
+          <label><input type="checkbox" id="colUQ"> UNIQUE</label>
+          <label><input type="checkbox" id="colAI"> AUTO_INCREMENT</label>
+        </div>
+        <label>Default Value</label>
+        <input type="text" id="colDefault" placeholder="e.g. NULL, 0, ''">
+        <button class="btn btn-primary" onclick="saveColumn()" style="margin-top:12px;width:100%">Save Column</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
