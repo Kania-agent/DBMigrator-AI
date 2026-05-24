@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBMigrator-AI — Database Migration Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="top-bar">
+        <div class="logo">
+            <span class="logo-icon">⬡</span>
+            <h1>DBMigrator<span class="ai-badge">AI</span></h1>
+        </div>
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="schema-diff">Schema Diff</button>
+            <button class="nav-tab" data-tab="migrations">Migrations</button>
+            <button class="nav-tab" data-tab="exec-log">Execution Log</button>
+        </nav>
+        <div class="status-badge">
+            <span class="pulse-dot"></span> Connected to <strong>prod_db</strong>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Schema Diff Tab -->
+        <section id="schema-diff" class="tab-panel active">
+            <div class="panel-header">
+                <h2>Schema Diff Viewer</h2>
+                <div class="diff-controls">
+                    <select id="source-db" class="db-select">
+                        <option value="source">Source: dev_database</option>
+                    </select>
+                    <span class="arrow-icon">→</span>
+                    <select id="target-db" class="db-select">
+                        <option value="target">Target: prod_database</option>
+                    </select>
+                    <button class="btn btn-primary" id="compare-btn">Compare Schemas</button>
+                </div>
+            </div>
+            <div class="diff-container">
+                <div class="diff-panel diff-source">
+                    <div class="diff-panel-header">
+                        <span class="db-label">Source Schema</span>
+                        <span class="table-count">4 tables</span>
+                    </div>
+                    <div class="schema-tree" id="source-tree"></div>
+                </div>
+                <div class="diff-divider">
+                    <div class="diff-summary" id="diff-summary">
+                        <div class="diff-stat added">+2 Tables</div>
+                        <div class="diff-stat modified">~3 Columns</div>
+                        <div class="diff-stat removed">-0 Tables</div>
+                    </div>
+                </div>
+                <div class="diff-panel diff-target">
+                    <div class="diff-panel-header">
+                        <span class="db-label">Target Schema</span>
+                        <span class="table-count">6 tables</span>
+                    </div>
+                    <div class="schema-tree" id="target-tree"></div>
+                </div>
+            </div>
+            <div class="ai-analysis-box">
+                <div class="ai-icon">⬡</div>
+                <div class="ai-content">
+                    <h4>AI Schema Analysis</h4>
+                    <p>Found <strong>2 new tables</strong>, <strong>3 column modifications</strong>, and <strong>1 missing index</strong>. Migration estimated at <strong>4.2 seconds</strong> with low risk. Recommended to add foreign key constraints for <code>orders.user_id</code> before applying.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Migrations Tab -->
+        <section id="migrations" class="tab-panel">
+            <div class="panel-header">
+                <h2>Migration Status</h2>
+                <button class="btn btn-success" id="run-migration-btn">▶ Run Pending Migrations</button>
+            </div>
+            <div class="migration-stats">
+                <div class="stat-card stat-completed">
+                    <div class="stat-number">24</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card stat-pending">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card stat-running">
+                    <div class="stat-number">1</div>
+                    <div class="stat-label">Running</div>
+                </div>
+                <div class="stat-card stat-failed">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+            </div>
+            <div class="migration-list" id="migration-list"></div>
+        </section>
+
+        <!-- Execution Log Tab -->
+        <section id="exec-log" class="tab-panel">
+            <div class="panel-header">
+                <h2>Execution Log</h2>
+                <div class="log-controls">
+                    <button class="btn btn-sm" id="clear-log-btn">Clear</button>
+                    <button class="btn btn-sm" id="export-log-btn">Export</button>
+                    <label class="auto-scroll-label">
+                        <input type="checkbox" id="auto-scroll" checked> Auto-scroll
+                    </label>
+                </div>
+            </div>
+            <div class="log-output" id="log-output"></div>
+        </section>
+    </main>
+
+    <footer class="bottom-bar">
+        <span>DBMigrator-AI v2.1.0</span>
+        <span>Powered by MiMo V2.5</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
